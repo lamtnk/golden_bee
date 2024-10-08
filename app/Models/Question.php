@@ -9,6 +9,14 @@ class Question extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'type',
+        'content',
+        'result',
+        'activate'
+    ];
+
     public function questionQueues()
     {
         return $this->hasMany(QuestionQueue::class, 'question_id');

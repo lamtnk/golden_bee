@@ -17,7 +17,7 @@ return new class extends Migration
             $table->tinyInteger("type");
             $table->string("content");
             $table->string("result");
-            $table->boolean("activate");
+            $table->boolean("activate")->default(true);
             $table->timestamps();
         });
     }

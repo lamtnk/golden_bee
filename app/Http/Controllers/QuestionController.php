@@ -4,62 +4,127 @@ namespace App\Http\Controllers;
 
 use App\Models\Question;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class QuestionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $questions = Question::all();
+        return response()->json($questions);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'type' => 'required|integer|between:0,3',
+            'content' => 'required|string',
+            'result' => 'required|string',
+        ]);
+
+        $data = $request->all();
+
+        if ($data['type'] != 0 && $request->hasFile('file')) {
+            $file = $request->file('file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $filePath = '';
+
+            switch ($data['type']) {
+                case 1:
+                    $filePath = 'file/images/' . $filename;
+                    break;
+                case 2:
+                    $filePath = 'file/audios/' . $filename;
+                    break;
+                case 3:
+                    $filePath = 'file/videos/' . $filename;
+                    break;
+            }
+
+            $file->move(public_path('file/' . ($data['type'] == 1 ? 'images' : ($data['type'] == 2 ? 'audios' : 'videos'))), $filename);
+            $data['content'] = $filePath;
+        }
+
+        $question = Question::create($data);
+
+        return response()->json($question, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Question $question)
+    public function show($id)
     {
-        //
+        $question = Question::find($id);
+        if (!$question) {
+            return response()->json(['message' => 'Question not found'], 404);
+        }
+
+        // Kiểm tra nếu content là đường dẫn tệp
+        if ($question->type != 0) {
+            $question->content_url = url($question->content);
+        }
+
+        return response()->json($question);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Question $question)
+    public function update(Request $request, $id)
     {
-        //
+        $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+            'type' => 'sometimes|required|integer|between:0,3',
+            'content' => 'sometimes|required|string',
+            'result' => 'sometimes|required|string',
+        ]);
+
+        $question = Question::find($id);
+        if (!$question) {
+            return response()->json(['message' => 'Question not found'], 404);
+        }
+
+        $data = $request->all();
+
+        if ($data['type'] != 0 && $request->hasFile('file')) {
+            // Xóa tệp cũ nếu có
+            if ($question->content) {
+                unlink(public_path($question->content));
+            }
+
+            $file = $request->file('file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $filePath = '';
+
+            switch ($data['type']) {
+                case 1:
+                    $filePath = 'file/images/' . $filename;
+                    break;
+                case 2:
+                    $filePath = 'file/audios/' . $filename;
+                    break;
+                case 3:
+                    $filePath = 'file/videos/' . $filename;
+                    break;
+            }
+
+            $file->move(public_path('file/' . ($data['type'] == 1 ? 'images' : ($data['type'] == 2 ? 'audios' : 'videos'))), $filename);
+            $data['content'] = $filePath;
+        }
+
+        $question->update($data);
+        return response()->json($question);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Question $question)
+    public function destroy($id)
     {
-        //
-    }
+        $question = Question::find($id);
+        if (!$question) {
+            return response()->json(['message' => 'Question not found'], 404);
+        }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Question $question)
-    {
-        //
+        // Xóa tệp nếu có
+        if ($question->content) {
+            unlink(public_path($question->content));
+        }
+
+        $question->delete();
+        return response()->json(['message' => 'Question deleted successfully']);
     }
 }

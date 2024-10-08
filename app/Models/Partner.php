@@ -9,6 +9,10 @@ class Partner extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+    ];
+
     public function questionQueues()
     {
         return $this->hasMany(QuestionQueue::class, 'partner_id');

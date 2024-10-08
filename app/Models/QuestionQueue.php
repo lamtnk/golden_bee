@@ -9,6 +9,13 @@ class QuestionQueue extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'question_id',
+        'partner_id',
+        'created_at',
+        'updated_at'
+    ];
+
     public function question()
     {
         return $this->belongsTo(Question::class, 'question_id');
