@@ -8,4 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class Start extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'activate',
+        'created_at',
+        'updated_at'
+    ];
 }

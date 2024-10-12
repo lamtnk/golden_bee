@@ -7,59 +7,59 @@ use Illuminate\Http\Request;
 
 class StartController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        // Phân trang kết quả, mỗi trang có 10 bản ghi
+        $starts = Start::paginate(10);
+        return response()->json($starts, 200);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Lưu một Start mới.
      */
     public function store(Request $request)
     {
-        //
+        $validatedData = $request->validate([
+            'activate' => 'required|boolean',
+        ]);
+
+        // Tạo mới Start
+        $start = Start::create($validatedData);
+        return response()->json($start, 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Start $start)
+    public function show($id)
     {
-        //
+        $start = Start::find($id);
+        if (!$start) {
+            return response()->json(['message' => 'Start not found'], 404);
+        }
+        return response()->json($start, 200);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Start $start)
+    public function update(Request $request, $id)
     {
-        //
+        $start = Start::find($id);
+        if (!$start) {
+            return response()->json(['message' => 'Start not found'], 404);
+        }
+
+        $validatedData = $request->validate([
+            'activate' => 'sometimes|required|boolean',
+        ]);
+
+        // Cập nhật Start
+        $start->update($validatedData);
+        return response()->json($start, 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Start $start)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Start $start)
-    {
-        //
+        $start = Start::find($id);
+        if (!$start) {
+            return response()->json(['message' => 'Start not found'], 404);
+        }
+        $start->delete();
+        return response()->json(['message' => 'Start deleted successfully'], 200);
     }
 }

@@ -25,6 +25,10 @@ class QuestionController extends Controller
 
         $data = $request->all();
 
+        if ($data['type'] != 0 && !$request->hasFile('file')) {
+            return response()->json(['message' => 'Type này phải có file truyền vào'], 404);
+        }
+
         if ($data['type'] != 0 && $request->hasFile('file')) {
             $file = $request->file('file');
             $filename = time() . '_' . $file->getClientOriginalName();
@@ -79,14 +83,20 @@ class QuestionController extends Controller
         if (!$question) {
             return response()->json(['message' => 'Question not found'], 404);
         }
-
+        
         $data = $request->all();
+        
+        if ($data['type'] != 0 && !$request->hasFile('file')) {
+            return response()->json(['message' => 'Type này phải có file truyền vào'], 404);
+        }
 
-        if ($data['type'] != 0 && $request->hasFile('file')) {
-            // Xóa tệp cũ nếu có
-            if ($question->content) {
+        // Xóa tệp cũ nếu có
+        if ($question->content) {
+            if (file_exists(public_path($question->content))) {
                 unlink(public_path($question->content));
             }
+        }
+        if ($data['type'] != 0 && $request->hasFile('file')) {
 
             $file = $request->file('file');
             $filename = time() . '_' . $file->getClientOriginalName();
@@ -121,10 +131,33 @@ class QuestionController extends Controller
 
         // Xóa tệp nếu có
         if ($question->content) {
-            unlink(public_path($question->content));
+            if (file_exists(public_path($question->content))) {
+                unlink(public_path($question->content));
+            }
         }
 
         $question->delete();
         return response()->json(['message' => 'Question deleted successfully']);
+    }
+
+    public function updateActivate(Request $request, $id)
+    {
+        // Xác thực dữ liệu
+        $request->validate([
+            'activate' => 'required|boolean',
+        ]);
+
+        $question = Question::find($id);
+        if (!$question) {
+            return response()->json(['message' => 'Question not found'], 404);
+        }
+
+        $question->activate = $request->input('activate');
+        $question->save();
+
+        return response()->json([
+            'message' => 'Activate status updated successfully',
+            'question' => $question
+        ], 200);
     }
 }

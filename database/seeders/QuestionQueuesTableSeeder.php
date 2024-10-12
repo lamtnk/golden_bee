@@ -69,5 +69,9 @@ class QuestionQueuesTableSeeder extends Seeder
                 'updated_at' => now(),
             ],
         ]);
+
+        DB::table('starts')->insert([
+            'activate' =>false
+        ]);
     }
 }

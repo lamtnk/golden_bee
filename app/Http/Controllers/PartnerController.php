@@ -7,59 +7,76 @@ use Illuminate\Http\Request;
 
 class PartnerController extends Controller
 {
-    /**
-     * Display a listing of the resource.
+     /**
+     * Hiển thị danh sách tất cả các người chơi với thông tin các queue câu hỏi.
      */
     public function index()
     {
-        //
+        // Eager load 'questionQueues'
+        $partners = Partner::with('questionQueues.question')->paginate(10);
+        return response()->json($partners, 200);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Lưu một người chơi mới.
      */
     public function store(Request $request)
     {
-        //
+        // Xác thực dữ liệu trực tiếp trong Controller
+        $validatedData = $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $partner = Partner::create($validatedData);
+        // Tải lại mối quan hệ 'questionQueues' sau khi tạo mới
+        $partner->load('questionQueues.question');
+        return response()->json($partner, 201);
     }
 
     /**
-     * Display the specified resource.
+     * Hiển thị thông tin một người chơi cụ thể với thông tin các queue câu hỏi.
      */
-    public function show(Partner $partner)
+    public function show($id)
     {
-        //
+        // Eager load 'questionQueues'
+        $partner = Partner::with('questionQueues.question')->find($id);
+        if (!$partner) {
+            return response()->json(['message' => 'Partner not found'], 404);
+        }
+        return response()->json($partner, 200);
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Cập nhật một người chơi cụ thể.
      */
-    public function edit(Partner $partner)
+    public function update(Request $request, $id)
     {
-        //
+        $partner = Partner::find($id);
+        if (!$partner) {
+            return response()->json(['message' => 'Partner not found'], 404);
+        }
+
+        // Xác thực dữ liệu trực tiếp trong Controller
+        $validatedData = $request->validate([
+            'name' => 'sometimes|required|string|max:255',
+        ]);
+
+        $partner->update($validatedData);
+        // Tải lại mối quan hệ 'questionQueues' sau khi cập nhật
+        $partner->load('questionQueues.question');
+        return response()->json($partner, 200);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Xóa một người chơi cụ thể.
      */
-    public function update(Request $request, Partner $partner)
+    public function destroy($id)
     {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Partner $partner)
-    {
-        //
+        $partner = Partner::find($id);
+        if (!$partner) {
+            return response()->json(['message' => 'Partner not found'], 404);
+        }
+        $partner->delete();
+        return response()->json(['message' => 'Partner deleted successfully'], 200);
     }
 }
