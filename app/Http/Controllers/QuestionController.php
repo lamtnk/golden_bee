@@ -11,19 +11,39 @@ class QuestionController extends Controller
     public function index()
     {
         $questions = Question::all();
+        foreach ($questions as $key => $item) {
+            if ($item->type != 0) {
+                $questions[$key]->content_url = url($item->content);
+            }
+        }
         return response()->json($questions);
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|integer|between:0,3',
-            'content' => 'required|string',
-            'result' => 'required|string',
+            'name' => 'required|max:255',
+            'type' => 'required',
+            'content' => 'string',
+            'result' => 'required',
+            'a' => 'required',
+            'b' => 'required',
+            'c' => 'required',
+            'd' => 'required',
         ]);
 
         $data = $request->all();
+
+        $choices = [
+            "A" => $data['a'],
+            "B" => $data['b'],
+            "C" => $data['c'],
+            "D" => $data['d'],
+        ];
+
+        $data['choice'] = $choices;
+
+        unset($data['a'], $data['b'], $data['c'], $data['d']);
 
         if ($data['type'] != 0 && !$request->hasFile('file')) {
             return response()->json(['message' => 'Type này phải có file truyền vào'], 404);
@@ -73,19 +93,34 @@ class QuestionController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'name' => 'sometimes|required|string|max:255',
-            'type' => 'sometimes|required|integer|between:0,3',
-            'content' => 'sometimes|required|string',
-            'result' => 'sometimes|required|string',
+            'name' => 'required|max:255',
+            'type' => 'required',
+            'content' => 'string',
+            'result' => 'required',
+            'a' => 'required',
+            'b' => 'required',
+            'c' => 'required',
+            'd' => 'required',
         ]);
 
         $question = Question::find($id);
         if (!$question) {
             return response()->json(['message' => 'Question not found'], 404);
         }
-        
+
         $data = $request->all();
-        
+
+        $choices = [
+            "A" => $data['a'],
+            "B" => $data['b'],
+            "C" => $data['c'],
+            "D" => $data['d'],
+        ];
+
+        $data['choice'] = $choices;
+
+        unset($data['a'], $data['b'], $data['c'], $data['d']);
+
         if ($data['type'] != 0 && !$request->hasFile('file')) {
             return response()->json(['message' => 'Type này phải có file truyền vào'], 404);
         }

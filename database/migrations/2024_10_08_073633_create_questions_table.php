@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string("name");
             $table->tinyInteger("type");
-            $table->string("content");
+            $table->string("content")->nullable();
+            $table->json("choice");
             $table->string("result");
             $table->boolean("activate")->default(true);
             $table->timestamps();

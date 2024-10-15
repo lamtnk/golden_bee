@@ -13,9 +13,29 @@ class Question extends Model
         'name',
         'type',
         'content',
+        'choice',
         'result',
         'activate'
     ];
+
+    protected $casts = [
+        'choice' => 'array', // Chuyển đổi 'choice' thành mảng
+    ];
+
+    public function type($type) {
+        switch($type) {
+            case 0:
+                return "Text";
+            case 1:
+                return "Image";
+            case 2:
+                return "Audio";
+            case 3:
+                return "Video";
+            default:
+                return "Text";
+        }
+    }
 
     public function questionQueues()
     {

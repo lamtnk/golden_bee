@@ -70,6 +70,11 @@ class QuestionQueueController extends Controller
      */
     public function destroy($id)
     {
+        if ($id === 'all') {
+            QuestionQueue::truncate();
+            return response()->json(['message' => 'All queues deleted successfully'], 200);
+        }
+
         $queue = QuestionQueue::find($id);
         if (!$queue) {
             return response()->json(['message' => 'Queue not found'], 404);
