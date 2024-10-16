@@ -81,71 +81,7 @@ class QuestionsTableSeeder extends Seeder
                 'result' => 'C',
                 'activate' => true,
             ],
-            [
-                'name' => 'Identify this musical instrument',
-                'type' => 1,
-                'content' => 'https://example.com/audio/question2.mp3',
-                'choice' => [
-                    'A' => 'Guitar',
-                    'B' => 'Piano',
-                    'C' => 'Violin',
-                    'D' => 'Drum',
-                ],
-                'result' => 'B',
-                'activate' => false,
-            ],
-            [
-                'name' => 'What animal is in this picture?',
-                'type' => 2,
-                'content' => 'https://example.com/images/question2.jpg',
-                'choice' => [
-                    'A' => 'Lion',
-                    'B' => 'Elephant',
-                    'C' => 'Tiger',
-                    'D' => 'Giraffe',
-                ],
-                'result' => 'B',
-                'activate' => true,
-            ],
-            [
-                'name' => 'Describe the action in this video',
-                'type' => 3,
-                'content' => 'https://example.com/videos/question2.mp4',
-                'choice' => [
-                    'A' => 'Person riding a bicycle',
-                    'B' => 'Person swimming',
-                    'C' => 'Person running',
-                    'D' => 'Person cooking',
-                ],
-                'result' => 'A',
-                'activate' => false,
-            ],
-            [
-                'name' => 'What is the chemical symbol for water?',
-                'type' => 0,
-                'content' => 'What is the chemical symbol for water?',
-                'choice' => [
-                    'A' => 'H2O',
-                    'B' => 'O2',
-                    'C' => 'CO2',
-                    'D' => 'NaCl',
-                ],
-                'result' => 'A',
-                'activate' => true,
-            ],
-            [
-                'name' => 'Identify this bird sound',
-                'type' => 1,
-                'content' => 'https://example.com/audio/question3.mp3',
-                'choice' => [
-                    'A' => 'Sparrow',
-                    'B' => 'Eagle',
-                    'C' => 'Parrot',
-                    'D' => 'Owl',
-                ],
-                'result' => 'A',
-                'activate' => true,
-            ],
+            
         ];
 
         // Lặp qua từng câu hỏi và tạo mới trong cơ sở dữ liệu

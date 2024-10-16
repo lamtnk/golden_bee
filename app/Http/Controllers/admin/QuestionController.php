@@ -6,16 +6,16 @@ use App\Http\Controllers\Controller;
 use App\Models\Question;
 use Illuminate\Http\Request;
 use App\Service\QuestionService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 
 class QuestionController extends Controller
 {
-    private $questionService;
 
     //
-    public function __construct(QuestionService $questionService)
+    public function __construct()
     {
-        $this->questionService = $questionService;
+        $this->middleware('auth');
     }
 
     public function index()

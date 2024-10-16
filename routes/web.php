@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\admin\QuestionController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
 
 Route::prefix('/question')->group(function () {
     Route::get('/', [QuestionController::class, 'index'])->name('admin.question.index');
@@ -23,4 +26,4 @@ Route::prefix('/question')->group(function () {
     Route::get('/edit/{id}', [QuestionController::class, 'showEditQuestion'])->name('admin.question.show_edit');
     Route::get('/delete', [QuestionController::class, 'deleteQuestion'])->name('admin.question.delete');
     Route::get('/activate', [QuestionController::class, 'editStatusQuestion'])->name('admin.question.activate');
-});
+})->middleware('auth');
