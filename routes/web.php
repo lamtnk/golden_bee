@@ -22,4 +22,5 @@ Route::prefix('/question')->group(function () {
     Route::post('/edit', [QuestionController::class, 'editQuestion'])->name('admin.question.edit');
     Route::get('/edit/{id}', [QuestionController::class, 'showEditQuestion'])->name('admin.question.show_edit');
     Route::get('/delete', [QuestionController::class, 'deleteQuestion'])->name('admin.question.delete');
+    Route::get('/activate', [QuestionController::class, 'editStatusQuestion'])->name('admin.question.activate');
 });

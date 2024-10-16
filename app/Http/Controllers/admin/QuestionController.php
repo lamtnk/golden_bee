@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Question;
 use Illuminate\Http\Request;
 use App\Service\QuestionService;
+use Illuminate\Support\Facades\Redirect;
 
 class QuestionController extends Controller
 {
@@ -60,7 +61,7 @@ class QuestionController extends Controller
         unset($data['a'], $data['b'], $data['c'], $data['d']);
 
         if ($data['type'] != 0 && !$request->file) {
-            return response()->json(['message' => 'Type này phải có file truyền vào'], 404);
+            return redirect()->back()->with('error', 'Type này phải có file truyền vào');;
         }
 
         if ($data['type'] != 0 && $request->file) {
@@ -87,53 +88,123 @@ class QuestionController extends Controller
         $question = Question::create($data);
 
         return redirect(route('admin.question.index'))->with('success', 'Thêm câu hỏi thành công');
-//     }
+    }
 
-}
 
-//     public function showEditQuestion(Request $request)
-//     {
-//         $id = $request->id;
-//         $allCategory = $this->categoryService->getAll();
-//         $productInfo = $this->productService->getById($id);
-//         $allVariations = $this->variationService->getAll();
-//         return view('admin.product.edit_product', compact('id', 'productInfo', 'allCategory', 'allVariations'));
-//     }
+    public function showEditQuestion(Request $request)
+    {
+        $id = $request->id;
+        $questionInfo = Question::find($id);
+        $choice = $questionInfo->choice;
+        $questionInfo->a = $choice['A'];
+        $questionInfo->b = $choice['B'];
+        $questionInfo->c = $choice['C'];
+        $questionInfo->d = $choice['D'];
+        return view('admin.question.edit_question', compact('questionInfo'));
+    }
 
-//     public function editQuestion(Request $request)
-//     {
-//         $request->validate([
-//             'id' => 'required',
-//             'category_id' => 'required',
-//             'product_name' => 'required',
-//             'product_name_en' => 'required',
-//         ]);
-//         $id = $request->id;
-//         $categoryId = $request->category_id;
-//         $productName = $request->product_name;
-//         $productNameEn = $request->product_name_en;
-//         $productPrice = $request->product_price;
-//         $productDescription = $request->product_description ?? null;
-//         $productDescriptionEn = $request->product_description_en ?? null;
-//         if ($request->product_image && $request->product_image != 'undefined') {
-//             $imageName = time() . '_' . $request->product_image->getClientOriginalName();
-//             $request->product_image->move(public_path('img/client/shop'), $imageName);
-//             $oldImagePath = $this->productService->getById($request->id)->image;
-//             if (file_exists(public_path('img/client/shop') . '/' . $oldImagePath)) {
-//                 unlink(public_path('img/client/shop') . '/' . $oldImagePath);
-//             }
-//         }
-//         return $this->productService->edit($id, $categoryId, $productName, $productNameEn, $productPrice, $productDescription, $productDescriptionEn, $imageName ?? null);
-//     }
+    public function editQuestion(Request $request)
+    {
+        $request->validate([
+            'id' => 'required',
+            'name' => 'required|max:255',
+            'type' => 'required',
+            'content' => 'string',
+            'result' => 'required',
+            'a' => 'required',
+            'b' => 'required',
+            'c' => 'required',
+            'd' => 'required',
+        ]);
 
-//     public function deleteQuestion(Request $request)
-//     {
-//         $id = $request->id;
-//         if($this->productService->checkHasPromotion($id)) {
-//             return redirect(route('admin.product.index'))->with('error', 'Sản phẩm đang khuyễn mãi không thể xóa');
-//         }
-//         $this->productService->delete($id);
-//         return redirect(route('admin.product.index'))->with('success', 'Ẩn thực phẩm thành công');
-//     }
+        $id = $request->id;
+
+        $question = Question::find($id);
+        if (!$question) {
+            return redirect()->back()->with('error', 'Không tìm thấy câu hỏi');
+        }
+
+        $data = $request->all();
+
+        $choices = [
+            "A" => $data['a'],
+            "B" => $data['b'],
+            "C" => $data['c'],
+            "D" => $data['d'],
+        ];
+
+        $data['choice'] = $choices;
+
+        unset($data['a'], $data['b'], $data['c'], $data['d']);
+
+        if ($question->type == 0) {
+            if ($data['type'] != 0 && !$request->hasFile('file')) {
+                return redirect()->back()->with('error', 'Chưa chọn file');
+            }
+        }
+        
+
+        // Xóa tệp cũ nếu có
+        if ($question->content) {
+            if (file_exists(public_path($question->content))) {
+                unlink(public_path($question->content));
+            }
+        }
+        if ($data['type'] != 0 && $request->hasFile('file')) {
+
+            $file = $request->file('file');
+            $filename = time() . '_' . $file->getClientOriginalName();
+            $filePath = '';
+
+            switch ($data['type']) {
+                case 1:
+                    $filePath = 'file/images/' . $filename;
+                    break;
+                case 2:
+                    $filePath = 'file/audios/' . $filename;
+                    break;
+                case 3:
+                    $filePath = 'file/videos/' . $filename;
+                    break;
+            }
+
+            $file->move(public_path('file/' . ($data['type'] == 1 ? 'images' : ($data['type'] == 2 ? 'audios' : 'videos'))), $filename);
+            $data['content'] = $filePath;
+        }
+
+        $question->update($data);
+
+        return redirect(route('admin.question.index'))->with('success', 'Sửa câu hỏi thành công');
+    }
+
+    public function editStatusQuestion(Request $request) {
+        $id = $request->id;
+        $activate = $request->activate;
+        $question = Question::find($id);
+
+        if (!$question) {
+            return redirect()->route('admin.question.index')->with('error', 'Không tìm thấy câu hỏi');
+        }
+        $question->activate = $activate;
+        $message = $activate == 1 ? "Mở câu hỏi thành công" : "Khóa câu hỏi thành công";
+        $question->save();
+
+        return redirect()->route('admin.question.index')->with('success', $message);
+    }
+
+    public function deleteQuestion(Request $request)
+    {
+        $id = $request->id;
+
+        $question = Question::find($id);
+        if (!$question) {
+            return redirect()->route('admin.question.index')->with('error', 'Không tìm thấy câu hỏi');
+        }
+
+        // $question->activate = $request->input('activate');
+        $question->delete();
+
+        return redirect()->route('admin.question.index')->with('success', 'Xóa câu hỏi thành công');
+    }
 
 }

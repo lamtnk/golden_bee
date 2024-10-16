@@ -33,9 +33,10 @@
                                     <th>STT</th>
                                     <th>Tên câu hỏi</th>
                                     <th>Nội dung câu hỏi</th>
-                                    <th>Các đáp án</th>
+                                    <th class="col-3">Các đáp án</th>
                                     <th class="col-2">Kết quả</th>
                                     <th>Kiểu</th>
+                                    <th>Trạng thái</th>
                                     <th class="col-2">Hành động</th>
                                 </tr>
                             </thead>
@@ -47,6 +48,7 @@
                                     <th>Các đáp án</th>
                                     <th>Kết quả</th>
                                     <th>Kiểu</th>
+                                    <th>Trạng thái</th>
                                     <th>Hành động</th>
                                 </tr>
                             </tfoot>
@@ -58,17 +60,28 @@
                                         @if ($item->type == 0)
                                             <td>{{ $item->content }}</td>
                                         @else
-                                            <td><a target="_blank" href="{{ $item->content_url }}">Click vào để xem nội dung</a></td>
+                                            <td><a target="_blank" href="{{ $item->content_url }}">Click vào để xem nội
+                                                    dung</a></td>
                                         @endif
                                         <td>{{ json_encode($item->choice, JSON_UNESCAPED_UNICODE) }}</td>
                                         <td>{{ $item->result }}</td>
                                         <td>{{ $item->type($item->type) }}</td>
+                                        <td>{{ $item->activate == 0 ? 'Khóa' : 'Khả dụng' }}</td>
                                         <td class="text-center">
-                                            <a class="btn btn-warning"
+                                            <a class="btn btn-secondary"
                                                 href="{{ route('admin.question.show_edit', ['id' => $item->id]) }}">Sửa</a>
                                             <a class="btn btn-danger"
                                                 onclick="event.preventDefault(); if (confirm('Bạn chắc chắn muốn xóa câu hỏi {{ $item->name }} chứ?')) { window.location.href = '{{ route('admin.question.delete', ['id' => $item->id]) }}'; }">
                                                 Xóa</a>
+                                            @if ($item->activate == true)
+                                                <a class="btn btn-warning"
+                                                    href="{{ route('admin.question.activate', ['id' => $item->id, 'activate' => 0]) }}">
+                                                    Khóa</a>
+                                            @else
+                                                <a class="btn btn-warning"
+                                                    href="{{ route('admin.question.activate', ['id' => $item->id, 'activate' => 1]) }}">
+                                                    Mở</a>
+                                            @endif
                                         </td>
 
                                     </tr>
